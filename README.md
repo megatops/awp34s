@@ -1,15 +1,17 @@
-# awp34s
+# Android WP-34s Calculator
 
 ![GitHub License](https://img.shields.io/github/license/megatops/awp34s?logo=license) ![GitHub top language](https://img.shields.io/github/languages/top/megatops/awp34s) ![GitHub contributors](https://img.shields.io/github/contributors-anon/megatops/awp34s) ![GitHub forks](https://img.shields.io/github/forks/megatops/awp34s) ![GitHub Repo stars](https://img.shields.io/github/stars/megatops/awp34s)
 
-This is a fork of [Pablo Martín Medrano's Android WP 34s port](https://github.com/odkq/awp34s). Changes made by me:
+This is a fork of [Pablo Martín Medrano's Android WP-34s port](https://github.com/odkq/awp34s). My changes:
 
-- Update the WP 34s code from [r3913](https://sourceforge.net/p/wp34s/code/3913/) (2019-11-24) to [r3927](https://sourceforge.net/p/wp34s/code/3927/) (2025-10-20).
+- Update the WP-34s code from [r3913](https://sourceforge.net/p/wp34s/code/3913/) (2019-11-24) to [r3927](https://sourceforge.net/p/wp34s/code/3927/) (2025-10-20).
 - Support `STOPW` (stopwatch) command.
 - Brand new high-res retro skin, with key press feedback.
 - Upgrade to Android SDK 34.
 
-Signed APKs are provided for your convenience under Releases. Below are the original README:
+Signed APKs are provided under releases, support Android 5.1+.
+
+Below is the original README (Note: some information is outdated):
 
 ---
 
