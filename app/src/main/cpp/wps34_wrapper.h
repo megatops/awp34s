@@ -29,7 +29,6 @@ extern "C"
     extern unsigned char dots[400];
     extern void init_calculator();
     void updateScreen();
-    extern int is_dot_wrapper(int n);
     extern int xprocess_keycode(int k);
     extern char *get_datfile(char *datfile, const char *basename);
 };

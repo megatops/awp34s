@@ -35,8 +35,8 @@
 #include "wp34s_android.h"
 
 uint64_t LcdData[10];
-unsigned long long int instruction_count = 0;
-int view_instruction_counter = 0;
+unsigned long long int instruction_count;
+int view_instruction_counter;
 
 /*
  * Return the directory for data files of this application in
@@ -47,7 +47,7 @@ char *get_datfile(char *datfile, const char *basename) {
     FILE *fp = fopen("/proc/self/cmdline", "r");
 
     /* cmdline is the name of the process, so the name of our app.
-     * wp34s.odkq.com most of the time, but just to make sure */
+     * wp34s.megatops.com most of the time, but just to make sure */
     fgets(line, sizeof line, fp);
     fclose(fp);
     sprintf(datfile, "/data/data/%s/%s", line, basename);
@@ -55,32 +55,15 @@ char *get_datfile(char *datfile, const char *basename) {
 }
 
 void init_calculator() {
+    memset(LcdData, 0, sizeof(LcdData));
+
     char datfile[1024];
-
-    for (int i = 0; i < 10; i++) {
-        LcdData[i] = 0;
-    }
-
     get_datfile(datfile, "wp34s.dat");
     load_statefile(datfile);
 
     DispMsg = NULL;
     init_34s();
     display();
-
-    /*
-    char prstr[1024];
-    char tmpstr[16];
-    unsigned char *data = (unsigned char *)LcdData;
-
-    prstr[0] = '\0';
-    strcat(prstr, "LcdData ");
-    for (int i= 0; i < 400; i++) {
-        sprintf(tmpstr, "[%03d:%02x]", i, (unsigned char)(data[i]));
-        strcat(prstr, tmpstr);
-    }
-    android_logString(prstr);
-    */
 }
 
 int is_key_pressed(void) {
@@ -146,8 +129,4 @@ extern void close_port(void) {
 
 void updateScreen() {
     android_logString("updateScreen start");
-}
-
-int is_dot_wrapper(int n) {
-    return is_dot(n);
 }

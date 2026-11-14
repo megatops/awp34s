@@ -24,21 +24,20 @@
 #include <string>
 #include "wps34_wrapper.h"
 
-JNIEnv *global_env;
+static JNIEnv *g_env;
 
 extern "C" {
 extern void display(void);
 
 int android_logString(char *text) {
-    jstring jTextParam = global_env->NewStringUTF(text);
-
-    jclass activityClass = global_env->FindClass("com/megatops/wp34s/MainActivity");
-    jmethodID logStringID = global_env->GetStaticMethodID(activityClass, "logString",
-                                                          "(Ljava/lang/String;)V");
+    auto jTextParam = g_env->NewStringUTF(text);
+    auto activityClass = g_env->FindClass("com/megatops/wp34s/MainActivity");
+    auto logStringID = g_env->GetStaticMethodID(activityClass, "logString",
+                                                "(Ljava/lang/String;)V");
     if (!logStringID) {
         return -1;
     }
-    global_env->CallStaticVoidMethod(activityClass, logStringID, jTextParam);
+    g_env->CallStaticVoidMethod(activityClass, logStringID, jTextParam);
     return 0;
 }
 }
@@ -48,11 +47,9 @@ extern "C" JNIEXPORT jint JNICALL
 Java_com_megatops_wp34s_MainActivity_wp34sInit(
         JNIEnv *env,
         jobject /* this */) {
-    global_env = env;
-    jint ret = 0;
-
+    g_env = env;
     init_calculator();
-    return ret;
+    return 0;
 }
 
 extern "C" JNIEXPORT jbyteArray JNICALL
@@ -66,12 +63,10 @@ Java_com_megatops_wp34s_CalcView_wp34sGetLcdData(
      * 142 + (BITMAP_WIDTH * 6) = 400
      * 400 = 50 * 8 bits
      */
-    jbyteArray retVal = env->NewByteArray(400);
-    jbyte *buf = env->GetByteArrayElements(retVal, nullptr);
+    auto retVal = env->NewByteArray(400);
+    auto *buf = env->GetByteArrayElements(retVal, nullptr);
     memcpy((void *) buf, (void *) dots, 400);
-
     env->ReleaseByteArrayElements(retVal, buf, 0);
-
     return retVal;
 }
 
@@ -83,7 +78,6 @@ Java_com_megatops_wp34s_CalcView_wp34sPutKey(
         jint key) {
     /* Translate row/column calculated key to the constants
      * in keys.h */
-    jint translated;
     static const jint J2C_KEY[] =
             {-1, 0, 1, 2, 3, 4, 5,
              6, 7, 8, 9, 10, 11,
@@ -97,6 +91,7 @@ Java_com_megatops_wp34s_CalcView_wp34sPutKey(
 #define K_HEARTBEAT 99 // From xeq.h
 #define ARRAY_SZ(arr) (sizeof(arr) / sizeof(arr[0]))
 
+    jint translated = -1;
     if (key == -2) { // in most case (100ms)
         translated = K_HEARTBEAT;
     } else if (key == -1) {
