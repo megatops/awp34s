@@ -23,7 +23,7 @@
 package com.megatops.wp34s;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
+import android.app.Activity;
 import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -66,9 +66,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
         setContentView(new CalcView(this));
         setupSystemBars();
         wp34sInit();
@@ -101,9 +98,11 @@ public class MainActivity extends AppCompatActivity {
 /*
  * Main View of the program, representing visual elements and input
  */
+@SuppressLint("ViewConstructor")
 class CalcView extends View {
-    private final Context CTX;            /* Store context */
+    private final Activity CTX;       /* Store context */
     private final Handler HANDLER = new Handler(Looper.getMainLooper());  /* Handler for timers */
+    private final Window WIN;
 
     private final Bitmap BACKGROUND;  /* Bitmap for the whole interface */
     private Canvas dotsCanvas;        /* Sub Canvas used for the 6x43 dots grid */
@@ -117,23 +116,27 @@ class CalcView extends View {
     private float ratioHeight = 0.0f;     /* Aspect ratio between bitmap and canvas */
     private float ratioWidth = 0.0f;      /* Aspect ratio between bitmap and canvas. Those
                                              are used to get the relative pixel that is clicked */
-
     private final Paint PRESSED_PAINT;
     private boolean showPressed = false;
     private int keyLeft, keyTop, keyRight, keyBottom; // draw key feedback overlay
     private final float PRESSED_RADIUS; // Corner radius in dp
 
+    private static final int IDLE_TICKS = 20; // 20 ticks × 100ms = ~2s
+    private int idleTickCount = 0;
+    private boolean keepAwakeActive = false;
+
     /* Dictionary mapping strings (name of assets) to loaded Bitmaps */
     private final Map<String, Bitmap> BMP = new HashMap<>();
 
     /* Constructor */
-    public CalcView(Context context) {
+    public CalcView(Activity context) {
         super(context);
-        this.CTX = context;
+        CTX = context;
+        WIN = CTX.getWindow();
         loadAssets();
 
-        BACKGROUND = Objects.requireNonNull(this.BMP.get("wp34s_V3_highres_modern"));
-        Bitmap fullscreen = Objects.requireNonNull(this.BMP.get("fullscreen"));
+        BACKGROUND = Objects.requireNonNull(BMP.get("wp34s_V3_highres_modern"));
+        Bitmap fullscreen = Objects.requireNonNull(BMP.get("fullscreen"));
         LCD_RATIO_HEIGHT = (float) fullscreen.getHeight() / ORIG_HEIGHT;
         DOTS = Bitmap.createBitmap(fullscreen.getWidth(), fullscreen.getHeight(),
                 Bitmap.Config.ARGB_8888);
@@ -153,7 +156,20 @@ class CalcView extends View {
             public void run() {
                 // heartbeat key, "pressed" every 100ms
                 if (wp34sPutKey(-2) == 0) {
+                    // we have screen update, that means the stopwatch is running, keep active
+                    idleTickCount = 0;
+                    if (!keepAwakeActive) {
+                        WIN.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        keepAwakeActive = true;
+                    }
                     invalidate(); // only refresh on screen update
+                } else {
+                    if (keepAwakeActive && ++idleTickCount >= IDLE_TICKS) {
+                        // stopwatch stopped (or it will update the screen @ 10Hz or 2Hz)
+                        WIN.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                        keepAwakeActive = false;
+                        idleTickCount = 0;
+                    }
                 }
                 HANDLER.postDelayed(this, 100);
             }
@@ -167,7 +183,7 @@ class CalcView extends View {
     private void loadAssets() {
         Bitmap bitmap;
         InputStream is = null;
-        AssetManager mgr = this.CTX.getAssets();
+        AssetManager mgr = CTX.getAssets();
         /* To list the contents of the assets dir filesystem permissions
          * have to be granted to the app, to open the file once known it does
          * not. That is why we list all the assets to be opened here (without
@@ -207,13 +223,13 @@ class CalcView extends View {
                 Log.e("WP34S.MainActivity", "failed to load asset", e);
             }
             bitmap = new BitmapDrawable(getResources(), is).getBitmap();
-            this.BMP.put(s, bitmap);
+            BMP.put(s, bitmap);
         }
     }
 
     /* Draw asset by name over the background canvas */
     private void drawAsset(Canvas canvas, Paint p, String name) {
-        Bitmap bitmap = this.BMP.get(name);
+        Bitmap bitmap = BMP.get(name);
         if (bitmap == null) {
             Log.i("WP34S.MainActivity", "asset " + name + " not found ");
             return;

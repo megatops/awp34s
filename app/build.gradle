@@ -12,8 +12,8 @@ android {
         applicationId "com.megatops.wp34s"
         minSdk 22
         targetSdk 34
-        versionCode 7
-        versionName '0.0.7a-r3927'
+        versionCode 8
+        versionName '0.0.8-r3927'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
