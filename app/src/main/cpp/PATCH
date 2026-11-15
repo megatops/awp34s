@@ -1,6 +1,6 @@
 diff -Naur original/decNumber/decContext.h new/decNumber/decContext.h
---- original/decNumber/decContext.h	2021-05-09 01:03:02.771054291 +0200
-+++ new/decNumber/decContext.h	2021-05-09 01:03:03.111054449 +0200
+--- original/decNumber/decContext.h
++++ new/decNumber/decContext.h
 @@ -43,11 +43,17 @@
  typedef unsigned char		uint8_t;
  typedef unsigned short int	uint16_t;
@@ -20,8 +20,8 @@ diff -Naur original/decNumber/decContext.h new/decNumber/decContext.h
    /* Conditional code flag -- set this to 0 for best performance */
    #define DECSUBSET 0              // 1=enable subset arithmetic
 diff -Naur original/display.c new/display.c
---- original/display.c	2021-05-09 01:03:03.059054425 +0200
-+++ new/display.c	2021-05-09 01:03:03.571054662 +0200
+--- original/display.c
++++ new/display.c
 @@ -28,6 +28,10 @@
  #include "printer.h"
  #include "serial.h"
@@ -33,17 +33,16 @@ diff -Naur original/display.c new/display.c
  static enum separator_modes { SEP_NONE, SEP_COMMA, SEP_DOT } SeparatorMode;
  static enum decimal_modes { DECIMAL_DOT, DECIMAL_COMMA } DecimalMode;
  
-@@ -2186,6 +2190,9 @@
+@@ -2228,6 +2232,8 @@
   *  Toggle the little "=" sign
   */
  void set_IO_annunciator(void) {
 +    return;
-+    // pmm
 +    /*
  	int on = SerialOn
  #ifdef REALBUILD
  	  || DebugFlag
-@@ -2200,6 +2207,7 @@
+@@ -2242,6 +2248,7 @@
  		IoAnnunciator = on;
  		finish_display();
  	}
@@ -51,7 +50,7 @@ diff -Naur original/display.c new/display.c
  }
  
  /*
-@@ -2539,6 +2547,8 @@
+@@ -2581,6 +2588,8 @@
  static void set_status_graphic(const unsigned char *graphic) {
  	int glen = *graphic++;
  	int i, j;
@@ -60,17 +59,16 @@ diff -Naur original/display.c new/display.c
  #ifndef CONSOLE
  	unsigned long long int mat[6];
  
-@@ -2552,14 +2562,14 @@
+@@ -2594,14 +2603,14 @@
  
  	for (i=0; i<6; i++)
  		for (j=1; j<=glen; j++) {
 -#ifndef CONSOLE
-+#if 0  // TODO: hack
++#if 0 // TODO: hack
  			if (graphic[j] & (1 << i))
  				mat[i] |= 1LL << j;
  #else
--			dot(j*6+i+MATRIX_BASE, (graphic[j] & (1 << i))?1:0);
-+        dot(j*6+i+MATRIX_BASE, (graphic[j] & (1 << i))?1:0);
+ 			dot(j*6+i+MATRIX_BASE, (graphic[j] & (1 << i))?1:0);
  #endif
  		}
 -#ifndef CONSOLE
@@ -78,42 +76,34 @@ diff -Naur original/display.c new/display.c
  	set_status_grob(mat);
  #endif
  }
-@@ -2667,22 +2677,23 @@
+@@ -2709,7 +2718,7 @@
  			for (j=0; j<width; j++) {
  				if (x+j >= BITMAP_WIDTH)
  					break;
 -#ifndef CONSOLE
--				if (cmap[i] & (1 << j))
--					mat[i] |= 1LL << (x+j);
--#else
-+//#ifndef CONSOLE
-+//				if (cmap[i] & (1 << j))
-+//					mat[i] |= 1LL << (x+j);
-+//#else
- 				dot((x+j)*6+i+MATRIX_BASE, (cmap[i] & (1 << j))?1:0);
--#endif
-+//#endif
- 			}
- 		x += width;
++#if 0
+ 				if (cmap[i] & (1 << j))
+ 					mat[i] |= 1LL << (x+j);
+ #else
+@@ -2720,11 +2729,11 @@
  	}
  
  
 -#ifndef CONSOLE
-+	// TODO: temporary curses code
-+#if 0
++#if 0 // TODO: temporary curses code
  	set_status_grob(mat);
  #else
 -	for (i=MATRIX_BASE + 6*x; i<400; i++)
 -		clr_dot(i);
-+	//for (i=MATRIX_BASE + 6*x; i<400; i++)
-+	//	clr_dot(i);
++	// for (i=MATRIX_BASE + 6*x; i<400; i++)
++	// 	clr_dot(i);
  #endif
  }
  
 diff -Naur original/features.h new/features.h
---- original/features.h	2021-05-09 01:03:02.803054306 +0200
-+++ new/features.h	2021-05-09 01:03:03.243054510 +0200
-@@ -16,10 +16,11 @@
+--- original/features.h
++++ new/features.h
+@@ -16,7 +16,7 @@
  #ifndef FEATURES_H__
  #define FEATURES_H__
  
@@ -122,14 +112,10 @@ diff -Naur original/features.h new/features.h
  #define CONSOLE
  #endif
  
-+
- /*
-  *  Select optional features here
-  */
 diff -Naur original/keys.c new/keys.c
---- original/keys.c	2021-05-09 01:03:02.799054304 +0200
-+++ new/keys.c	2021-05-09 01:03:03.231054505 +0200
-@@ -1439,10 +1439,12 @@
+--- original/keys.c
++++ new/keys.c
+@@ -1445,10 +1445,12 @@
  	case K_CMPLX:
  		if (State2.ind || State2.dot)
  			break;
@@ -143,8 +129,8 @@ diff -Naur original/keys.c new/keys.c
  
  	case K63:	// Y
 diff -Naur original/lcd.c new/lcd.c
---- original/lcd.c	2021-05-09 01:03:03.063054427 +0200
-+++ new/lcd.c	2021-05-09 01:03:03.571054662 +0200
+--- original/lcd.c
++++ new/lcd.c
 @@ -15,6 +15,7 @@
   */
  
@@ -153,7 +139,7 @@ diff -Naur original/lcd.c new/lcd.c
  #include "lcd.h"
  #include "display.h"
  #include "xeq.h"
-@@ -26,8 +31,9 @@
+@@ -26,8 +27,9 @@
  volatile FLAG WaitForLcd;
  #endif
  
@@ -165,40 +151,23 @@ diff -Naur original/lcd.c new/lcd.c
  #ifdef __GNUC__
  #pragma GCC diagnostic ignored "-Wformat"
  #pragma GCC diagnostic ignored "-Wformat-extra-args"
-@@ -49,14 +55,30 @@
+@@ -49,9 +51,15 @@
  
  /* Some wrapper routines to set segments of the display */
  void set_dot(int n) {
--        dots[n] = 1;
-+    // char buffer[256];
-+    // sprintf(buffer, "set_dot %d", n);
-+    // android_logString(buffer);
-+    dots[n] = 1;
++        // char buffer[256];
++        // sprintf(buffer, "set_dot %d", n);
++        // android_logString(buffer);
+         dots[n] = 1;
  }
  void clr_dot(int n) {
--        dots[n] = 0;
-+    /*
-+    char buffer[256];
-+    sprintf(buffer, "clr_dot %d", n);
-+    android_logString(buffer);
-+    */
-+    dots[n] = 0;
++        // char buffer[256];
++        // sprintf(buffer, "clr_dot %d", n);
++        // android_logString(buffer);
+         dots[n] = 0;
  }
  int is_dot(int n) {
- 	return dots[n];
- }
-+/*
-+#if defined(QTGUI) || defined(IOS) || defined (ANDROID)
-+volatile uint32_t *LcdAddr;
-+#else
-+volatile unsigned int *LcdAddr;
-+#endif
-+ */
-+
- #else
- 
- static const unsigned char lcd_addr[] = {
-@@ -71,7 +93,7 @@
+@@ -71,7 +79,7 @@
  #undef M
  };
  
@@ -207,26 +176,18 @@ diff -Naur original/lcd.c new/lcd.c
  volatile uint32_t *LcdAddr;
  #else
  volatile unsigned int *LcdAddr;
-@@ -79,34 +101,52 @@
- 
+@@ -80,6 +88,10 @@
  static int find_dot(int n) {
          unsigned int m;
--        
-+
+         
 +        char str[64];
 +        sprintf(str, "find_dot(%d)", n);
 +        android_logString(str);
 +
          if ( n >= 0 && n <= 141 ) {
--                m = 1 << lcd_bit[n];
--		LcdAddr = AT91C_SLCDC_MEM + lcd_addr[n];
--		return m;
--	}
-+            m = 1 << lcd_bit[n];
-+		    LcdAddr = AT91C_SLCDC_MEM + lcd_addr[n];
-+		    return m;
-+	    }
- 	return 0;
+                 m = 1 << lcd_bit[n];
+ 		LcdAddr = AT91C_SLCDC_MEM + lcd_addr[n];
+@@ -89,24 +101,38 @@
  }
  
  void set_dot(int n) {
@@ -236,8 +197,7 @@ diff -Naur original/lcd.c new/lcd.c
 +
          unsigned int m = find_dot(n);
          if (m != 0)
--		*LcdAddr |= m;
-+		    *LcdAddr |= m;
+ 		*LcdAddr |= m;
  }
  
  void clr_dot(int n) {
@@ -247,8 +207,7 @@ diff -Naur original/lcd.c new/lcd.c
 +
          unsigned int m = find_dot(n);
          if (m != 0)
--                *LcdAddr &= ~m;
-+            *LcdAddr &= ~m;
+                 *LcdAddr &= ~m;
  }
  
  int is_dot(int n) {
@@ -267,7 +226,7 @@ diff -Naur original/lcd.c new/lcd.c
          volatile unsigned long long int *p = (volatile unsigned long long int *)AT91C_SLCDC_MEM;
          int i, j;
  
-@@ -200,6 +240,13 @@
+@@ -200,6 +226,13 @@
      	LastDisplayedNumber[NUMBER_LENGTH]=0;
      	xset(LastDisplayedExponent, ' ', EXPONENT_LENGTH);
      	LastDisplayedExponent[EXPONENT_LENGTH]=0;
@@ -281,17 +240,16 @@ diff -Naur original/lcd.c new/lcd.c
  #else
          // terrible code which assumes int are 4 bytes long. Works fine for realbuild and for WINGUI though
  	xset((void *) AT91C_SLCDC_MEM, 0, 4 * 20);
-@@ -219,6 +266,9 @@
+@@ -219,6 +252,8 @@
  	erase();
          MOVE(0, 4);
  #else
-+        // pmm
 +        int i;
 +
          putchar('\r');
          for (i=0; i<70; i++)
                  putchar(' ');
-@@ -524,7 +574,7 @@
+@@ -524,7 +559,7 @@
  #elif defined(WINGUI)
          void EXPORT UpdateDlgScreen(int force);
          UpdateDlgScreen(1);
@@ -301,8 +259,8 @@ diff -Naur original/lcd.c new/lcd.c
          updateScreen();
  #else
 diff -Naur original/lcd.h new/lcd.h
---- original/lcd.h	2021-05-09 01:03:02.803054306 +0200
-+++ new/lcd.h	2021-05-09 01:03:03.247054511 +0200
+--- original/lcd.h
++++ new/lcd.h
 @@ -18,6 +18,12 @@
  #define __LCD_H__
  #include "xeq.h"
@@ -316,7 +274,7 @@ diff -Naur original/lcd.h new/lcd.h
  #if defined(QTGUI) || defined(IOS)
  #include <stdint.h>
  #endif
-@@ -93,8 +93,9 @@
+@@ -93,8 +99,9 @@
  #define Lcd_Enable()
  #endif
  
@@ -328,21 +286,32 @@ diff -Naur original/lcd.h new/lcd.h
  #define AT91C_SLCDC_MEM ((uint32_t*) LcdData)
  #define Lcd_Enable()
 diff -Naur original/pretty.c new/pretty.c
---- original/pretty.c	2021-05-09 01:03:02.807054308 +0200
-+++ new/pretty.c	2021-05-09 01:03:03.255054516 +0200
-@@ -22,6 +22,9 @@
+--- original/pretty.c
++++ new/pretty.c
+@@ -22,6 +22,8 @@
  #include "xeq.h"		// This helps the syntax checker
  #include "display.h"		// This too
  
-+// pmm
 +#include "consts.h"
 +
  #include "translate.c"		// unicode[]
  #include "font_alias.inc"	// more character aliases
  
+diff -Naur original/stopwatch.c new/stopwatch.c
+--- original/stopwatch.c
++++ new/stopwatch.c
+@@ -116,7 +116,7 @@
+  * Current ticker count. Or its emulation when not running on WP34s hardware
+  */
+ unsigned long getTicker() {
+-#if defined(CONSOLE) || defined(IOS)
++#if defined(CONSOLE) || defined(IOS) || defined(ANDROID)
+     struct timeval tv;
+     gettimeofday(&tv,(struct timezone*) NULL);
+     return tv.tv_sec * 10 + tv.tv_usec / 100000;
 diff -Naur original/storage.c new/storage.c
---- original/storage.c	2021-05-09 01:03:02.803054306 +0200
-+++ new/storage.c	2021-05-09 01:03:03.239054508 +0200
+--- original/storage.c
++++ new/storage.c
 @@ -59,6 +59,8 @@
  #include "stats.h"
  #include "alpha.h"
@@ -352,7 +321,7 @@ diff -Naur original/storage.c new/storage.c
  #define PAGE_SIZE	 256
  
  /*
-@@ -466,15 +468,16 @@
+@@ -468,15 +470,16 @@
  #if defined(QTGUI) || defined(IOS)
  extern char* get_region_path(int region);
  #else
@@ -371,7 +340,7 @@ diff -Naur original/storage.c new/storage.c
  	char *dest = (char *) destination;
  	FILE *f = NULL;
  	int offset;
-@@ -488,11 +491,11 @@
+@@ -490,11 +493,11 @@
  	 *  Update the correct region file
  	 */
  	if ( dest >= (char *) &BackupFlash && dest < (char *) &BackupFlash + sizeof( BackupFlash ) ) {
@@ -385,30 +354,25 @@ diff -Naur original/storage.c new/storage.c
  		offset = dest - (char *) &UserFlash;
  	}
  	else {
-@@ -859,9 +862,11 @@
- 	if ( filename != NULL && *filename != '\0' ) {
- 		strncpy( StateFile, filename, FILENAME_MAX );
+@@ -863,7 +866,7 @@
  	}
-+
  	f = fopen( StateFile, "wb" );
  	if ( f == NULL ) {
 -		ShowMessage( "Save Error", strerror( errno ) );
-+		// pmm
 +		// ShowMessage( "Save Error", strerror( errno ) );
  		return;
  	}
  	process_cmdline_set_lift();
-@@ -899,7 +904,8 @@
+@@ -901,7 +904,7 @@
  
  	if ( *CurrentDir == '\0' ) {
  		// Determine current directory on first call
 -		getcwd( CurrentDir, FILENAME_MAX );
-+		// pmm
 +		// getcwd( CurrentDir, FILENAME_MAX );
  		p = CurrentDir + strlen( CurrentDir );
  		if ( p != CurrentDir && p[ -1 ] != SEPARATOR ) {
  			*p = SEPARATOR;
-@@ -1011,7 +1017,7 @@
+@@ -1013,7 +1016,7 @@
  
  static char* mktmpname(char* name, const char* prefix)
  {
@@ -417,32 +381,18 @@ diff -Naur original/storage.c new/storage.c
  	strcpy(name, "wp34s");
  	strcat(name, prefix);
  	strcat(name, "_XXXXXX");
-@@ -1081,7 +1097,9 @@
+@@ -1084,7 +1087,7 @@
  		f = fopen( tempname, "rb" );
  
  		if ( f == NULL ) {
 -			ShowMessage( "Import Failed", "Assembler output file error: %s", strerror( errno ) );
-+			// pmm
-+			;
 +			// ShowMessage( "Import Failed", "Assembler output file error: %s", strerror( errno ) );
  		}
  		else {
  			size = (int) fread( buffer, 2, sizeof( buffer ) / 2, f );
-diff -Naur original/stopwatch.c new/stopwatch.c
---- original/stopwatch.c	2026-11-07 18:24:59.606377800 +0800
-+++ new/stopwatch.c	2026-11-08 15:01:26.569148900 +0800
-@@ -116,7 +116,7 @@
-  * Current ticker count. Or its emulation when not running on WP34s hardware
-  */
- unsigned long getTicker() {
--#if defined(CONSOLE) || defined(IOS)
-+#if defined(CONSOLE) || defined(IOS) || defined(ANDROID)
-     struct timeval tv;
-     gettimeofday(&tv,(struct timezone*) NULL);
-     return tv.tv_sec * 10 + tv.tv_usec / 100000;
 diff -Naur original/xeq.c new/xeq.c
---- original/xeq.c	2021-05-09 01:03:02.799054304 +0200
-+++ new/xeq.c	2021-05-09 01:03:03.223054500 +0200
+--- original/xeq.c
++++ new/xeq.c
 @@ -248,7 +248,7 @@
  }
  
@@ -452,16 +402,15 @@ diff -Naur original/xeq.c new/xeq.c
  //	shutdown();
  }
  
-@@ -6175,6 +6175,8 @@
+@@ -6330,6 +6330,7 @@
  #ifndef REALBUILD
  
  #include "string.h"
 +extern char *get_datfile(char *datfile, const char *basename);
-+// #include "wps34_wrapper.h"
  
  void paste_raw_x(const char *in)
  {
-@@ -6252,6 +6254,16 @@
+@@ -6407,6 +6408,16 @@
  	}
  }
  
@@ -479,8 +428,8 @@ diff -Naur original/xeq.c new/xeq.c
  
  #ifdef GNUC_POP_ERROR
 diff -Naur original/xeq.h new/xeq.h
---- original/xeq.h	2021-05-09 01:03:02.787054299 +0200
-+++ new/xeq.h	2021-05-09 01:03:03.179054481 +0200
+--- original/xeq.h
++++ new/xeq.h
 @@ -86,9 +86,11 @@
          unsigned int l[2];      // makes 32 bit alignment possible
  } REGISTER;
@@ -493,9 +442,3 @@ diff -Naur original/xeq.h new/xeq.h
  
  /* Define some system flag to user flag mappings
   */
-@@ -1459,4 +1461,5 @@
- extern void paste_raw_x(const char *p);
- #endif
- 
-+
- #endif

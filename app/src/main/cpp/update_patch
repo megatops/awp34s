@@ -1,0 +1,37 @@
+#!/bin/bash
+# Regenerate PATCH after changed the code in cpp/
+
+set -e
+
+MANIFEST="SVN_MANIFEST"
+OUT="PATCH"
+
+[ -f "$MANIFEST" ] || { echo "missing file: $MANIFEST" >&2; exit 1; }
+
+# Locate the wp34s-code-<REV>-trunk/ directory
+ORIG_DIR=$(echo wp34s-code-*-trunk)
+[ -d "$ORIG_DIR" ] || { echo "missing dir: wp34s-code-*-trunk/" >&2; exit 1; }
+
+> "$OUT"
+
+while IFS= read -r file; do
+    [ -z "$file" ] && continue
+    orig="$ORIG_DIR/$file"
+    [ -f "$orig" ] || { echo "skip (no original): $orig" >&2; continue; }
+    [ -f "$file" ] || { echo "skip (no new): $file" >&2; continue; }
+
+    # skip identical files (no empty diff blocks)
+    if diff -q "$orig" "$file" > /dev/null 2>&1; then
+        continue
+    fi
+
+    # command header, matching the original patch format
+    echo "diff -Naur original/$file new/$file" >> "$OUT"
+
+    diff -Naur \
+        --label "original/$file" \
+        --label "new/$file" \
+        "$orig" "$file" >> "$OUT" || true
+done < <(LC_ALL=C sort "$MANIFEST")
+
+echo "wrote $OUT ($(wc -l < "$OUT") lines)"
