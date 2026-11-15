@@ -27,6 +27,7 @@ extern "C"
 {
     extern uint64_t LcdData[10];
     extern unsigned char dots[400];
+    extern void save_state();
     extern void init_calculator();
     void updateScreen();
     extern int xprocess_keycode(int k);

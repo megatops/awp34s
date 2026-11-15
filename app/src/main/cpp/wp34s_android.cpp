@@ -52,6 +52,13 @@ Java_com_megatops_wp34s_MainActivity_wp34sInit(
     return 0;
 }
 
+extern "C" JNIEXPORT void JNICALL
+Java_com_megatops_wp34s_MainActivity_wp34sSaveState(
+        JNIEnv *env,
+        jobject /* this */) {
+    save_state();
+}
+
 extern "C" JNIEXPORT jbyteArray JNICALL
 Java_com_megatops_wp34s_CalcView_wp34sGetLcdData(
         JNIEnv *env,

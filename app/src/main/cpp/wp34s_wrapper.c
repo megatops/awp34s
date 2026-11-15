@@ -54,6 +54,14 @@ char *get_datfile(char *datfile, const char *basename) {
     return datfile;
 }
 
+void save_state() {
+    android_logString("stoping\n");
+
+    char datfile[1024];
+    get_datfile(datfile, "wp34s.dat");
+    save_statefile(datfile);
+}
+
 void init_calculator() {
     memset(LcdData, 0, sizeof(LcdData));
 

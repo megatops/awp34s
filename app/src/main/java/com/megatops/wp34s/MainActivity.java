@@ -71,6 +71,12 @@ public class MainActivity extends AppCompatActivity {
         wp34sInit();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        wp34sSaveState(); // save calculator state when switching to background
+    }
+
     // change system bar color to match theme
     @SuppressWarnings("deprecation")
     private void setupSystemBars() {
@@ -91,6 +97,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public native int wp34sInit();
+
+    public native void wp34sSaveState();
 }
 
 /*

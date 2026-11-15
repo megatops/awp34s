@@ -13,8 +13,7 @@ android {
         minSdk 22
         targetSdk 34
         versionCode 8
-        versionName '0.0.8-r3927'
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        versionName '0.0.8a-r3927'
     }
     buildTypes {
         release {
