@@ -55,8 +55,7 @@ char *get_datfile(char *datfile, const char *basename) {
 }
 
 void save_state() {
-    android_logString("stoping\n");
-
+    android_logString("save state\n");
     char datfile[1024];
     get_datfile(datfile, "wp34s.dat");
     save_statefile(datfile);

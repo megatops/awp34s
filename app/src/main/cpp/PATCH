@@ -33,24 +33,7 @@ diff -Naur original/display.c new/display.c
  static enum separator_modes { SEP_NONE, SEP_COMMA, SEP_DOT } SeparatorMode;
  static enum decimal_modes { DECIMAL_DOT, DECIMAL_COMMA } DecimalMode;
  
-@@ -2228,6 +2232,8 @@
-  *  Toggle the little "=" sign
-  */
- void set_IO_annunciator(void) {
-+    return;
-+    /*
- 	int on = SerialOn
- #ifdef REALBUILD
- 	  || DebugFlag
-@@ -2242,6 +2248,7 @@
- 		IoAnnunciator = on;
- 		finish_display();
- 	}
-+    */
- }
- 
- /*
-@@ -2581,6 +2588,8 @@
+@@ -2581,6 +2585,8 @@
  static void set_status_graphic(const unsigned char *graphic) {
  	int glen = *graphic++;
  	int i, j;
@@ -59,7 +42,7 @@ diff -Naur original/display.c new/display.c
  #ifndef CONSOLE
  	unsigned long long int mat[6];
  
-@@ -2594,14 +2603,14 @@
+@@ -2594,14 +2600,14 @@
  
  	for (i=0; i<6; i++)
  		for (j=1; j<=glen; j++) {
@@ -76,16 +59,16 @@ diff -Naur original/display.c new/display.c
  	set_status_grob(mat);
  #endif
  }
-@@ -2709,7 +2718,7 @@
+@@ -2709,7 +2715,7 @@
  			for (j=0; j<width; j++) {
  				if (x+j >= BITMAP_WIDTH)
  					break;
 -#ifndef CONSOLE
-+#if 0
++#if 0 // TODO: hack
  				if (cmap[i] & (1 << j))
  					mat[i] |= 1LL << (x+j);
  #else
-@@ -2720,11 +2729,11 @@
+@@ -2720,11 +2726,11 @@
  	}
  
  
@@ -112,22 +95,6 @@ diff -Naur original/features.h new/features.h
  #define CONSOLE
  #endif
  
-diff -Naur original/keys.c new/keys.c
---- original/keys.c
-+++ new/keys.c
-@@ -1445,10 +1445,12 @@
- 	case K_CMPLX:
- 		if (State2.ind || State2.dot)
- 			break;
-+#ifndef ANDROID
- 		if (base == RARG_STO)
- 			CmdBase = RARG_STOM;
- 		else if (base == RARG_RCL)
- 			CmdBase = RARG_RCLM;
-+#endif
- 		break;
- 
- 	case K63:	// Y
 diff -Naur original/lcd.c new/lcd.c
 --- original/lcd.c
 +++ new/lcd.c
@@ -139,19 +106,18 @@ diff -Naur original/lcd.c new/lcd.c
  #include "lcd.h"
  #include "display.h"
  #include "xeq.h"
-@@ -26,8 +27,9 @@
+@@ -26,8 +27,8 @@
  volatile FLAG WaitForLcd;
  #endif
  
 -#ifdef USECURSES
 -static unsigned char dots[400];
-+// TODO: We will pass the whole 400 bytes "dots" for now
-+#if 1
++#if 1 // TODO: We will pass the whole 400 bytes "dots" for now
 +unsigned char dots[400];
  #ifdef __GNUC__
  #pragma GCC diagnostic ignored "-Wformat"
  #pragma GCC diagnostic ignored "-Wformat-extra-args"
-@@ -49,9 +51,15 @@
+@@ -49,9 +50,15 @@
  
  /* Some wrapper routines to set segments of the display */
  void set_dot(int n) {
@@ -167,89 +133,32 @@ diff -Naur original/lcd.c new/lcd.c
          dots[n] = 0;
  }
  int is_dot(int n) {
-@@ -71,7 +79,7 @@
- #undef M
- };
- 
+@@ -194,12 +201,15 @@
+ 	*LastDisplayedText = '\0';
+ #endif
+         wait_for_display();
 -#if defined(QTGUI) || defined(IOS)
-+#if defined(QTGUI) || defined(IOS) || defined (ANDROID)
- volatile uint32_t *LcdAddr;
- #else
- volatile unsigned int *LcdAddr;
-@@ -80,6 +88,10 @@
- static int find_dot(int n) {
-         unsigned int m;
-         
-+        char str[64];
-+        sprintf(str, "find_dot(%d)", n);
-+        android_logString(str);
-+
-         if ( n >= 0 && n <= 141 ) {
-                 m = 1 << lcd_bit[n];
- 		LcdAddr = AT91C_SLCDC_MEM + lcd_addr[n];
-@@ -89,24 +101,38 @@
- }
- 
- void set_dot(int n) {
-+        char str[64];
-+        sprintf(str, "set_dot(%d)", n);
-+        android_logString(str);
-+
-         unsigned int m = find_dot(n);
-         if (m != 0)
- 		*LcdAddr |= m;
- }
- 
- void clr_dot(int n) {
-+        char str[64];
-+        sprintf(str, "clr_dot(%d)", n);
-+        android_logString(str);
-+
-         unsigned int m = find_dot(n);
-         if (m != 0)
-                 *LcdAddr &= ~m;
- }
- 
- int is_dot(int n) {
-+        char str[64];
-+        sprintf(str, "is_dit(%d)", n);
-+        android_logString(str);
-+
-         unsigned int m = find_dot(n);
-         return m != 0 && (*LcdAddr & m) != 0;
- }
- 
- 
- void set_status_grob(unsigned long long int grob[6]) {
-+        android_logString("set_status_grob");
-+
-         volatile unsigned long long int *p = (volatile unsigned long long int *)AT91C_SLCDC_MEM;
-         int i, j;
- 
-@@ -200,6 +226,13 @@
++#if defined(QTGUI) || defined(IOS) || defined(ANDROID)
+     	xset(LcdData, 0, sizeof(LcdData));
+     	xset(LastDisplayedNumber, ' ', NUMBER_LENGTH);
      	LastDisplayedNumber[NUMBER_LENGTH]=0;
      	xset(LastDisplayedExponent, ' ', EXPONENT_LENGTH);
      	LastDisplayedExponent[EXPONENT_LENGTH]=0;
-+#elif defined(ANDROID)
-+    	xset(LcdData, 0, (int)sizeof(LcdData));
-+    	xset(LastDisplayedNumber, ' ', NUMBER_LENGTH);
-+    	LastDisplayedNumber[NUMBER_LENGTH]=0;
-+    	xset(LastDisplayedExponent, ' ', EXPONENT_LENGTH);
-+    	LastDisplayedExponent[EXPONENT_LENGTH]=0;
++#if defined(ANDROID)
 +    	memset(dots, 0, sizeof(dots));
++#endif
  #else
          // terrible code which assumes int are 4 bytes long. Works fine for realbuild and for WINGUI though
  	xset((void *) AT91C_SLCDC_MEM, 0, 4 * 20);
-@@ -219,6 +252,8 @@
- 	erase();
+@@ -220,6 +230,7 @@
          MOVE(0, 4);
  #else
-+        int i;
-+
          putchar('\r');
++        int i;
          for (i=0; i<70; i++)
                  putchar(' ');
-@@ -524,7 +559,7 @@
+         putchar('\r');
+@@ -524,7 +535,7 @@
  #elif defined(WINGUI)
          void EXPORT UpdateDlgScreen(int force);
          UpdateDlgScreen(1);
@@ -321,7 +230,7 @@ diff -Naur original/storage.c new/storage.c
  #define PAGE_SIZE	 256
  
  /*
-@@ -468,15 +470,16 @@
+@@ -468,9 +470,9 @@
  #if defined(QTGUI) || defined(IOS)
  extern char* get_region_path(int region);
  #else
@@ -333,16 +242,11 @@ diff -Naur original/storage.c new/storage.c
  }
  #endif
  
- static int program_flash( void *destination, void *source, int count )
- {
- 	char *name;
-+	char buffer[1024];
- 	char *dest = (char *) destination;
- 	FILE *f = NULL;
- 	int offset;
-@@ -490,11 +493,11 @@
+@@ -489,12 +491,13 @@
+ 	/*
  	 *  Update the correct region file
  	 */
++	char buffer[1024];
  	if ( dest >= (char *) &BackupFlash && dest < (char *) &BackupFlash + sizeof( BackupFlash ) ) {
 -		name = get_region_path( REGION_BACKUP );
 +		name = get_region_path( REGION_BACKUP , buffer);
@@ -402,26 +306,15 @@ diff -Naur original/xeq.c new/xeq.c
  //	shutdown();
  }
  
-@@ -6330,6 +6330,7 @@
- #ifndef REALBUILD
- 
- #include "string.h"
-+extern char *get_datfile(char *datfile, const char *basename);
- 
- void paste_raw_x(const char *in)
- {
-@@ -6407,6 +6408,16 @@
+@@ -6407,6 +6407,13 @@
  	}
  }
  
++extern void save_state();
 +void shutdown_calc( void )
 +{
-+	char datfile[1024];
-+
 +	android_logString("exiting\n");
-+	get_datfile(datfile, "wp34s.dat");
-+	save_statefile(datfile);
-+
++	save_state();
 +	exit( 0 );
 +}
  #endif

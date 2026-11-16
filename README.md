@@ -5,7 +5,7 @@
 This is a fork of [Pablo Martín Medrano's Android WP-34s port](https://github.com/odkq/awp34s). My changes:
 
 - Update the WP-34s code from [r3913](https://sourceforge.net/p/wp34s/code/3913/) (2019-11-24) to [r3927](https://sourceforge.net/p/wp34s/code/3927/) (2025-10-20).
-- Support `STOPW` (stopwatch) command.
+- Support `STOPW` (stopwatch), `STOM` & `RCLM` (mode data store & recall) commands.
 - Brand new high-res retro skin, with key press feedback.
 - Upgrade to Android SDK 34.
 

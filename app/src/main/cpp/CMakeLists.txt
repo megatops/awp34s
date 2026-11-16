@@ -179,11 +179,6 @@ target_compile_options(wp34s PRIVATE
         -Wno-macro-redefined
 )
 
-target_compile_definitions(wp34s PUBLIC
-        INCLUDE_USER_MODE
-        ANDROID
-)
-
 target_include_directories(wp34s PRIVATE ./)
 
 # Searches for a specified prebuilt library and stores the path as a
