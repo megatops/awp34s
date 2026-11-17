@@ -1,15 +1,24 @@
 # Android WP-34s Calculator
 
-![GitHub License](https://img.shields.io/github/license/megatops/awp34s?logo=license) ![GitHub top language](https://img.shields.io/github/languages/top/megatops/awp34s) ![GitHub contributors](https://img.shields.io/github/contributors-anon/megatops/awp34s) ![GitHub forks](https://img.shields.io/github/forks/megatops/awp34s) ![GitHub Repo stars](https://img.shields.io/github/stars/megatops/awp34s)
+![No AI](https://img.shields.io/badge/%F0%9F%A4%97-No_AI-green) [![DeepWiki](https://img.shields.io/badge/DeepWiki-awp34s-blue)](https://deepwiki.com/megatops/awp34s) ![GitHub License](https://img.shields.io/github/license/megatops/awp34s?logo=license) ![GitHub top language](https://img.shields.io/github/languages/top/megatops/awp34s) ![GitHub contributors](https://img.shields.io/github/contributors-anon/megatops/awp34s) ![GitHub forks](https://img.shields.io/github/forks/megatops/awp34s) ![GitHub Repo stars](https://img.shields.io/github/stars/megatops/awp34s)
 
 This is a fork of [Pablo Martín Medrano's Android WP-34s port](https://github.com/odkq/awp34s). My changes:
 
-- Update the WP-34s code from [r3913](https://sourceforge.net/p/wp34s/code/3913/) (2019-11-24) to [r3927](https://sourceforge.net/p/wp34s/code/3927/) (2025-10-20).
-- Support `STOPW` (stopwatch), `STOM` & `RCLM` (mode data store & recall) commands.
-- Brand new high-res retro skin, with key press feedback.
-- Upgrade to Android SDK 34.
+- New features & enhancements:
+  - Brand new high-res retro skin, with key press feedback.
+  - Update the WP-34s code from [r3913](https://sourceforge.net/p/wp34s/code/3913/) (2019-11-24) to [r3927](https://sourceforge.net/p/wp34s/code/3927/) (2025-10-20).
+  - Support <kbd>CPX</kbd> <kbd>R/S</kbd> (`STOPW`, stopwatch), <kbd>STO</kbd> <kbd>CPX</kbd> (`STOM`, mode data store) and <kbd>RCL</kbd> <kbd>CPX</kbd> (`RCLM`, mode data recall).
+  - Automatically save the state of the WP-34S when the app is switched to the background to prevent data loss.
+  - Keep screen on only when stopwatch is running, otherwise follow the system settings.
+  - Upgrade to Android SDK 34.
+- Bug fixes:
+  - Prevent `SEND*` and `RECV` (serial I/O) commands hang, now it will report `I/O error` since there is no serial port on Android.
 
-Signed APKs are provided under releases, support Android 5.1+.
+This fork can only be built with Android Studio, run `apply_patch` in `app/src/main/cpp` before build. Signed APKs are provided under releases, support Android 5.1+.
+
+> ℹ **Disclaimer**
+>
+> All product names, logos, and brands such as _HP_, _Hewlett-Packard_, are property of their respective owners. Their use in this project is for identification and reference only and does not imply any endorsement or partnership.
 
 Below is the original README (Note: some information is outdated):
 
