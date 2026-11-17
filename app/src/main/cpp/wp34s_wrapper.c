@@ -121,14 +121,13 @@ enum shifts shift_down(void) {
 }
 
 void put_byte(unsigned char byte) {
-    report_err(ERR_PROG_BAD);
 }
 
 void flush_comm(void) {
 }
 
 int open_port(int baud, int bits, int parity, int stopbits) {
-    return 0;
+    return 1;
 }
 
 extern void close_port(void) {
